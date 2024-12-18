@@ -14,10 +14,13 @@ import { useContext } from 'react';
 
 
 const Home = () => {
-  const {} = useContext(MyContext);
-
+  const { loginSuccess, isAuthenticated } = useContext(MyContext);
+  
   return (
     <div>
+      {loginSuccess && (
+        <div id="succ">Muvaffaqiyatli ro'yxatdan o'tildi</div>
+      )}
       <HeroSwiper />
       <AboutKasana />
       <KasanaTypes />
@@ -30,8 +33,7 @@ const Home = () => {
       <Success />
       <Questions />
     </div>
-  )
-}
+  );
+};
 
 export default Home;
-
