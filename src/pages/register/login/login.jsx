@@ -1,39 +1,29 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { MyContext } from "../../../context/myContext";
-import { globalApi } from "../../../App";
 import InputMask from "react-input-mask";
+import { MyContext } from "../../../context/myContext";
+import { usersServerUrl } from "../../../SuperVars.js";
+import axios from "axios";
+
 
 const Login = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    selectedLanguage,
-    setSelectedLanguage,
-    languages,
-    setLanguages,
-    signupSuccess,
-    isAuthendticated,
-    setIsAuthenticated,
-    token,
-    setToken,
-    refresh,
-    setRefresh,
-    setLoginSuccess,
-    setIsAdmin,
-    setData
-  } = useContext(MyContext);
+  const { selectedLanguage, setSelectedLanguage, languages, setLanguages, signupSuccess } = useContext(MyContext);
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const toggleDropDown = () => {
     setIsOpen(!isOpen);
   };
+  
   const closeDropdown = (e) => {
     if (!e.target.closest(".dropdown")) {
       setIsOpen(false);
     }
   };
+  
   useEffect(() => {
     document.addEventListener("click", closeDropdown);
 
@@ -41,6 +31,7 @@ const Login = () => {
       document.removeEventListener("click", closeDropdown);
     };
   }, []);
+  
   const handleLanguageChange = (newLanguage) => {
     // O'rnini almashtirish
     const updatedLanguages = languages.filter((lang) => lang !== newLanguage);
@@ -49,6 +40,7 @@ const Login = () => {
     setLanguages(updatedLanguages); // Dropdowndagi tillarni yangilash
     setIsOpen(false); // Dropdownni yopish
   };
+
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -81,48 +73,38 @@ const Login = () => {
       setError(newError);
       return;
     } else {
-      setLoading(true);
-      setError({ phone: "", password: "", general: "" });
+      setLoading(true)
+      setError("")
     }
-    try {
-      const response = await fetch(
-        `${globalApi}/users/token/?phone=${phone}&password=${password}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
 
-      if(response.status === 404) {
-          setUsernot("Foydalanuvchi topilmadi!")
-      } else if(response.status === 400) {
-        setUsernot("Tarmoq xatoligi")
+    const loginData = {
+      phone,
+      password,
+    };
+
+    try {
+      const response = await axios.post(`${usersServerUrl}accounts/sign-in/`, loginData);
+
+      if (!response.ok) {
+          newError.general = "Telefon raqami yoki parol xato!";
       }
-      
-      const data = await response.json();
-      const { token, refresh } = data;
-      localStorage.setItem("access_token", token);
-      localStorage.setItem("refresh_token", refresh);
-      setData(data)
-      setToken(data.access);
-      setLoginSuccess(true)
-      setIsAdmin(data.role);
-      console.log(data.role);
-      
+
+      const data = await response.data;
+      const { access, refresh } = data;
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+
+      localStorage.setItem('access', access);
+      localStorage.setItem('refresh', refresh);
+
       navigate("/");
-      window.location.reload();
     } catch (err) {
-      setNetErr(true);
-      setLoading(false);
-      setError((prev) => ({
-        ...prev,
-        general: err.message, // umumiy xatolikni ko'rsatish
-      }));
+      setNetErr(true)
+    } finally {
+      setLoading(false)
     }
   };
-
+  
   return (
     <div id="login">
       <div className="login-header">

@@ -44,7 +44,7 @@ import AddNews from "./pages/addNews/addNews";
 import AdminNewsCategories from "./pages/admin-news-categories/admin-news-categories";
 import UsersMessaging from "./pages/usersMessaging/usersMessaging";
 
-export const globalApi = "http://bk.kasanabozor.uz"
+import './createAxiosClient';
 
 function AppContent() {
   const location = useLocation();
@@ -149,3 +149,4 @@ export default App;
 // fainted narvent
 // no pole dont toliver
 // swim
+

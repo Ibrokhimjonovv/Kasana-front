@@ -1,674 +1,19 @@
-// src/MyContext.js
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import axios from "axios";
+import { usersServerUrl, eCommerseServerUrl } from "../SuperVars";
 
-import productImg1 from "./productImg1.png";
-import authorImg from "./authorImg1.png";
-
-import newsImg1 from "./newsImg1.png";
-import newsImg2 from "./newsImg2.png";
-import newsImg3 from "./newsImg3.png";
-import newsImg4 from "./newsImg4.png";
-import cardImg1 from "./cardImg1.png";
-import cardImg2 from "./cardImg2.png";
-import cardImg3 from "./cardImg3.png";
-import cardImg4 from "./cardImg4.png";
-import profileImg1 from "./profileImg.png";
-import authorImgAnn from "./authorImg.png";
-import authorImg2 from "./authorImg2.png";
 
 export const MyContext = createContext(null);
 
 export const MyContextProvider = ({ children }) => {
-  // Vaqtinchalik mahsulotlar ro'yxati
-  const products = [
-    {
-      id: 1,
-      title: "Mahsulot nomi 1",
-      description: "Mahsulot tavsifi 1",
-      oldPrice: 256000,
-      newPrice: null,
-      rating: 4.8,
-      category: "Kasanachilik",
-      paid: true,
-      img: productImg1,
-      authorImg: authorImg,
-      authorName: "Nilufar Tashkentova",
-      work: "Hunarmand",
-    },
-    {
-      id: 2,
-      title: "Mahsulot nomi 2",
-      description: "Mahsulot tavsifi 2",
-      oldPrice: 300000,
-      newPrice: 250000,
-      rating: 4.5,
-      category: "Ipakchilik",
-      paid: false,
-      img: productImg1,
-      authorImg: authorImg,
-      authorName: "Nilufar Tashkentova",
-      work: "Hunarmand",
-    },
-    {
-      id: 3,
-      title: "Mahsulot nomi 3",
-      description: "Mahsulot tavsifi 3",
-      oldPrice: 500000,
-      newPrice: 450000,
-      rating: 3.9,
-      category: "Tandirchilik",
-      paid: true,
-      img: productImg1,
-      authorImg: authorImg,
-      authorName: "Nilufar Tashkentova",
-      work: "Hunarmand",
-    },
-    {
-      id: 4,
-      title: "Mahsulot nomi 4",
-      description: "Mahsulot tavsifi 4",
-      oldPrice: 500000,
-      newPrice: 450000,
-      rating: 3.9,
-      category: "Tandirchilik",
-      paid: true,
-      img: productImg1,
-      authorImg: authorImg,
-      authorName: "Nilufar Tashkentova",
-      work: "Hunarmand",
-    },
-    {
-      id: 5,
-      title: "Mahsulot nomi 5",
-      description: "Mahsulot tavsifi 5",
-      oldPrice: 256000,
-      newPrice: 200000,
-      rating: 4.8,
-      category: "Kasanachilik",
-      paid: true,
-      img: productImg1,
-      authorImg: authorImg,
-      authorName: "Nilufar Tashkentova",
-      work: "Hunarmand",
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [newsList] = useState([]);
+  const [documents] = useState([]);
+  const [courses] = useState([]);
+  const [announcements] = useState([]);
 
-  const [newsList, setNewsList] = useState([
-    {
-      id: 1,
-      img: newsImg1,
-      date: "Bugun",
-      views: 2567,
-      title: "O‘zini o‘zi band qilgan shaxslar",
-      description:
-        "«Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida»gi",
-      type: "Qonunchilik",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 2,
-      img: newsImg2,
-      date: "Bugun",
-      views: 3123,
-      title: "Hunarmandchilik va kasanachilikni",
-      description:
-        "Традиционным способом изготовленный браслет, очень красивый и узорчатый",
-      type: "Me’yoriy hujjatlar",
-      category: "Meyoriy huquqiy hujjatlar",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 3,
-      img: newsImg3,
-      date: "Kecha",
-      views: 1345,
-      title: "Milliy hunarmandchilik festivali",
-      description:
-        "An’anaviy hunarmandlar festivali qiziqarli voqealar va ko‘rgazmalar bilan boyitilgan.",
-      type: "Madaniyat",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 4,
-      img: newsImg4,
-      date: "O‘tgan hafta",
-      views: 5678,
-      title: "Texnologiya va innovatsiyalar",
-      description: "Yangi texnologiyalarning jamiyatdagi o‘rni va rivoji.",
-      type: "Texnologiya",
-      category: "Meyoriy huquqiy hujjatlar",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 5,
-      img: newsImg1,
-      date: "Bugun",
-      views: 2567,
-      title: "O‘zini o‘zi band qilgan shaxslar",
-      description:
-        "«Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida»gi",
-      type: "Qonunchilik",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 6,
-      img: newsImg2,
-      date: "Bugun",
-      views: 3123,
-      title: "Hunarmandchilik va kasanachilikni",
-      description:
-        "Традиционным способом изготовленный браслет, очень красивый и узорчатый",
-      type: "Me’yoriy hujjatlar",
-      category: "Meyoriy huquqiy hujjatlar",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 7,
-      img: newsImg3,
-      date: "Kecha",
-      views: 1345,
-      title: "Milliy hunarmandchilik festivali",
-      description:
-        "An’anaviy hunarmandlar festivali qiziqarli voqealar va ko‘rgazmalar bilan boyitilgan.",
-      type: "Madaniyat",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 8,
-      img: newsImg4,
-      date: "O‘tgan hafta",
-      views: 5678,
-      title: "Texnologiya va innovatsiyalar",
-      description: "Yangi texnologiyalarning jamiyatdagi o‘rni va rivoji.",
-      type: "Texnologiya",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 9,
-      img: newsImg1,
-      date: "Bugun",
-      views: 2567,
-      title: "O‘zini o‘zi band qilgan shaxslar",
-      description:
-        "«Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida»gi",
-      type: "Qonunchilik",
-      category: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 10,
-      img: newsImg2,
-      date: "Bugun",
-      views: 3123,
-      title: "Hunarmandchilik va kasanachilikni",
-      description:
-        "Традиционным способом изготовленный браслет, очень красивый и узорчатый",
-      type: "Me’yoriy hujjatlar",
-      category: "Meyoriy huquqiy hujjatlar",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 11,
-      img: newsImg3,
-      date: "Kecha",
-      views: 1345,
-      title: "Milliy hunarmandchilik festivali",
-      description:
-        "An’anaviy hunarmandlar festivali qiziqarli voqealar va ko‘rgazmalar bilan boyitilgan.",
-      type: "Madaniyat",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 12,
-      img: newsImg4,
-      date: "O‘tgan hafta",
-      views: 5678,
-      title: "Texnologiya va innovatsiyalar",
-      description: "Yangi texnologiyalarning jamiyatdagi o‘rni va rivoji.",
-      type: "Texnologiya",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 13,
-      img: newsImg1,
-      date: "Bugun",
-      views: 2567,
-      title: "O‘zini o‘zi band qilgan shaxslar",
-      description:
-        "«Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida»gi",
-      type: "Qonunchilik",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 14,
-      img: newsImg2,
-      date: "Bugun",
-      views: 3123,
-      title: "Hunarmandchilik va kasanachilikni",
-      description:
-        "Традиционным способом изготовленный браслет, очень красивый и узорчатый",
-      type: "Me’yoriy hujjatlar",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 15,
-      img: newsImg3,
-      date: "Kecha",
-      views: 1345,
-      title: "Milliy hunarmandchilik festivali",
-      description:
-        "An’anaviy hunarmandlar festivali qiziqarli voqealar va ko‘rgazmalar bilan boyitilgan.",
-      type: "Madaniyat",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-      postedDate: "11.11.2024",
-    },
-    {
-      id: 16,
-      img: newsImg4,
-      date: "O‘tgan hafta",
-      views: 5678,
-      title: "Texnologiya va innovatsiyalar",
-      description: "Yangi texnologiyalarning jamiyatdagi o‘rni va rivoji.",
-      type: "Texnologiya",
-      authorImg: authorImg,
-      authorName: "Muallif ismi",
-    },
-  ]);
-
-  const documentsCategory = [
-    {
-      id: 1,
-      category: "Qonunchilik hujjatlari",
-    },
-    {
-      id: 2,
-      category: "Kichik biznes loyihalar",
-    },
-  ];
-
-  const documents = [
-    {
-      id: 1,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Qonunchilik hujjatlari",
-    },
-    {
-      id: 2,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Qonunchilik hujjatlari",
-    },
-    {
-      id: 3,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Qonunchilik hujjatlari",
-    },
-    {
-      id: 4,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 5,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 6,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 7,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 8,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 9,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-    {
-      id: 10,
-      title:
-        "Kasanachilikni yanada rivojlantirishga oid qo‘shimcha chora-tadbirlar to‘g‘risida",
-      smallTitle: "Kasanachilikni rivojlantirish, bu sohada yangi",
-      category: "Kichik biznes loyihalar",
-    },
-  ];
-
-  const courses = [
-    {
-      id: 1,
-      img: cardImg1,
-      category: "Kasanachilik",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      paid: "free",
-      date: "11.11.2024",
-      rating: 4.9,
-      viewsCount: 123456,
-      share: 32,
-      lessons: [
-        {
-          id: 1,
-          title: "Kirish darsi",
-          videoUrl: "https://www.w3schools.com/html/movie.mp4",
-          description: "Bu darsda dasturlash asoslari bilan tanishamiz.",
-        },
-        {
-          id: 2,
-          title: "O'zgaruvchilar va ma'lumot turlari",
-          videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-          description:
-            "O'zgaruvchilar va ma'lumot turlari haqida batafsil ma'lumot.",
-        },
-        {
-          id: 3,
-          title: "Funksiyalar va algoritmlar",
-          videoUrl: "https://example.com/lesson3.mp4",
-          description: "Funksiyalar va algoritmlar haqida asosiy tushunchalar.",
-        },
-      ],
-    },
-    {
-      id: 2,
-      img: cardImg1,
-      category: "Kasanachilik",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      paid: "free",
-      date: "11.11.2024",
-      rating: 4.9,
-      viewsCount: 123456,
-      share: 32,
-      lessons: [
-        {
-          id: 1,
-          title: "Kirish darsi",
-          videoUrl: "https://www.w3schools.com/html/movie.mp4",
-          description: "Bu darsda dasturlash asoslari bilan tanishamiz.",
-        },
-        {
-          id: 2,
-          title: "O'zgaruvchilar va ma'lumot turlari",
-          videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-          description:
-            "O'zgaruvchilar va ma'lumot turlari haqida batafsil ma'lumot.",
-        },
-        {
-          id: 3,
-          title: "Funksiyalar va algoritmlar",
-          videoUrl: "https://example.com/lesson3.mp4",
-          description: "Funksiyalar va algoritmlar haqida asosiy tushunchalar.",
-        },
-      ],
-    },
-    {
-      id: 3,
-      img: cardImg3,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 4,
-      img: cardImg4,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 5,
-      img: cardImg1,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 6,
-      img: cardImg2,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 7,
-      img: cardImg3,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 8,
-      img: cardImg4,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 9,
-      img: cardImg1,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 10,
-      img: cardImg2,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 11,
-      img: cardImg3,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 12,
-      img: cardImg4,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 13,
-      img: cardImg1,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 14,
-      img: cardImg2,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 1 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 15,
-      img: cardImg3,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-    {
-      id: 16,
-      img: cardImg4,
-      category: "#kategoriya",
-      title: "An’anaviy taqinchoqlar yasash",
-      description:
-        "An'anaviy usulda tayyorlangan bilaguzuk, juda chiroyli va naqshli",
-      details: { users: 123, duration: "2s. 32d.", lessons: 25, rating: 4.9 },
-      author: "Otabek Rajabov",
-      profileImg: profileImg1,
-      oldPrice: 256000,
-      newPrice: 200000,
-      isPaid: "paid",
-    },
-  ];
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const announcements = [
     {
@@ -874,26 +219,59 @@ export const MyContextProvider = ({ children }) => {
   ];
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState("");
-  const [ refresh, setRefresh ] = useState("");
+  
   const [followedCourses, setFollowedCourses] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState("UZ"); // Boshlang'ich til
   const [languages, setLanguages] = useState(["RU", "EN"]); // Dropdowndagi boshqa tillar
   const [isOpen, setIsOpen] = useState(false);
   const [signupSuccess, setSignUpSuccess] = useState("");
-  const [loginSuccess, setLoginSuccess] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [data, setData] = useState(null);
-  
-  useEffect(() => {
-    // LocalStorage dan access_tokenni olish
-    const tokenn = localStorage.getItem("access_token");
-  
-    // Agar access_token mavjud bo'lsa, isAuthenticated ni true qilamiz
-    if (tokenn) {
-      setIsAuthenticated(true);
+
+  const loadContextData = async () => {
+    try {
+      const userResponse = await axios.post(`${usersServerUrl}accounts/get-me/`);
+      setIsAuthenticated(userResponse.data.status === 'ok');
+    } catch (err) {
+      console.error(err);
+      setIsAuthenticated(false);
     }
-  }, []);
+
+    try {
+      const productsResponse = await axios.get(`${eCommerseServerUrl}products/popular/`);
+      if (productsResponse.data.status === "ok") {
+        setProducts(productsResponse.data.results);
+        console.log(productsResponse.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    try {
+      const categoriesResponse = await axios.get(`${eCommerseServerUrl}categories/list/`);
+      if (categoriesResponse.data.status === "ok") {
+        setCategories(categoriesResponse.data.results);
+	console.log(categoriesResponse.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true; // To prevent setting state on unmounted component
+
+    const loadData = async () => {
+      if (isMounted) {
+        await loadContextData();
+      }
+    };
+
+    loadData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [usersServerUrl]); // Ensure usersServerUrl is a dependency if it's dynamic
 
   return (
     <MyContext.Provider
@@ -915,8 +293,7 @@ export const MyContextProvider = ({ children }) => {
         setIsOpen,
         signupSuccess,
         setSignUpSuccess,
-        token, setToken,
-        refresh, setRefresh,
+        categories
         setLoginSuccess,
         loginSuccess,
         isAdmin,

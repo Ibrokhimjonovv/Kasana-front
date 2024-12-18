@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./productDetails.scss";
+import axios from 'axios';
 
 import img1 from "./productImg1.png";
 import img2 from "./productImg2.png";
@@ -9,6 +10,7 @@ import img4 from "./productImg4.png";
 import img5 from "./productImg5.png";
 import { MyContext } from "../../context/myContext";
 import Loading from "../../components/loading/loading";
+import { eCommerseServerUrl } from "../../SuperVars";
 import AddComments from "../../components/addComments/addComments";
 import AddProductsComments from "../../components/addProductComments/addProductsComment";
 
@@ -18,46 +20,54 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [selectedDep, setSelectedDep] = useState("tarriff");
   const [similarProducts, setSimilarProducts] = useState([]);
-  const { products } = useContext(MyContext);
-  const [mainImage, setMainImage] = useState(img1);
-  const [images, setImages] = useState([img2, img3, img4, img5, img5]);
+  const [mainImage, setMainImage] = useState(null);
+
+  const [images, setImages] = useState([]);
+
   const handleImageClick = (selectedImage, index) => {
     setImages([mainImage, ...images.filter((_, i) => i !== index)]);
     setMainImage(selectedImage);
   };
 
-  useEffect(() => {
-    const foundProduct = products.find((item) => item.id === parseInt(id));
-    setProduct(foundProduct);
+  const loadProductData = async () => {
+    try {
+      const productsResponse = await axios.post(`${eCommerseServerUrl}products/exact/`, {'id': parseInt(id)}, {'headers': {'Content-Type': 'application/json'}});
 
-    if (foundProduct) {
-      const filteredProducts = products.filter(
-        (item) =>
-          item.category === foundProduct.category && item.id !== foundProduct.id
-      );
-      setSimilarProducts(filteredProducts);
+      setProduct(productsResponse.data.product);
+      setSimilarProducts(productsResponse.data.related);
+      setImages(productsResponse.data.product.product_image_Ecommerce_product_images);
+      setMainImage(productsResponse.data.product.product_image_Ecommerce_product_images[0]);
+    } catch (err) {
+      console.error(err);
     }
-  }, [id]);
+  };
 
-  if (!product) {
-    return (
-      <p>
-        <Loading />
-      </p>
-    );
-  }
+  useEffect(() => {
+    let isMounted = true; // To prevent setting state on unmounted component
+
+    const loadData = async () => {
+      if (isMounted) {
+        await loadProductData();
+      }
+    };
+
+    loadData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Ensure usersServerUrl is a dependency if it's dynamic
 
   const handleChange = (event) => {
     setSelectedDep(event.target.id);
-    console.log(selectedDep);
   };
 
   const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
 
-  return (
-    <div className="product-details">
+  return (product ? <><div className="product-details">
       <div className="to-back">
         <div className="inner">
           <Link to="/online-shop">
@@ -112,7 +122,7 @@ const ProductDetails = () => {
               />
             </svg>
           </span>
-          <span>{product.title}</span>
+          <span>{product.name}</span>
         </div>
       </div>
 
@@ -123,7 +133,7 @@ const ProductDetails = () => {
               {images.map((image, index) => (
                 <img
                   key={index}
-                  src={image}
+                  src={ `http://127.0.0.1:8901${image.image}` }
                   alt={`Image ${index + 2}`}
                   onClick={() => handleImageClick(image, index)}
                   style={{ cursor: "pointer" }}
@@ -131,28 +141,39 @@ const ProductDetails = () => {
               ))}
             </div>
             <div className="hero-image">
-              <img src={mainImage} alt="" />
+              <img src={ `http://127.0.0.1:8901${mainImage.image}` } alt="" />
             </div>
           </div>
+          <div className="with-author">
+            <div className="author">
+              <img src={product.user.pfp} alt="" />
+              <div className="text">
+                <div className="name">{product.user.first_name} {product.user.last_name}</div>
+                <div className="work">{product.work}</div>
+              </div>
+            </div>
+            <Link to="#">Buyurtma qilish</Link>
+          </div>
+
         </div>
         <div className="texts">
-          <div className="title">{product.title}</div>
+          <div className="title">{product.name}</div>
 
           <div className="price">
             <span
               className={
-                product.newPrice === null ? "oldPrice active" : "oldPrice "
+                product.price_off === null ? "oldPrice active" : "oldPrice "
               }
             >
-              {formatPrice(product.oldPrice)} so'm
+              {formatPrice(product.price)} so'm
             </span>
-            <span className={product.newPrice ? "newPrice active" : "newPrice"}>
-              {product.newPrice ? `${formatPrice(product.newPrice)} so'm` : ""}
+            <span className={product.price_off ? "newPrice active" : "newPrice"}>
+              {product.price_off ? `${formatPrice(product.price_off)} so'm` : ""}
             </span>
-            {product.newPrice && (
+            {product.price_off && (
               <div className="chegirma">
                 {Math.round(
-                  ((product.oldPrice - product.newPrice) / product.oldPrice) *
+                  ((product.price - product.price_off) / product.price) *
                     100
                 )}
                 % CHEGIRMA
@@ -201,6 +222,39 @@ const ProductDetails = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
+
+              <p className="title">Tarif</p>
+              <p>{ product.price }</p>
+            </div>
+            <div
+              className={`datas-container ${
+                selectedDep === "datas" ? "active" : ""
+              }`}
+            >
+              <p className="title">Pichoqning o’lchamlari va tavsifi:</p>
+              <div className="more-data">
+                <ul>
+                  {product.product_dimension_Ecommerce_product_dimentions.map((value, index) => <li key={ index }>
+                    <span>{ value.name }:</span>
+                    <span></span>
+                    <span>{ value.value }</span>
+                  </li>)}
+                  
+                </ul>
+                <div className="xus">
+                  <div className="title">Xususiyatlari</div>
+                  {/* <div className="xus-inner">
+                    <p>Qulay tutish uchun ergonomik tutqich dizayni</p>
+                    <p>Mustahkamlikni oshiruvchi to‘liq karkasli tuzilma</p>
+                    <p>Korroziyaga chidamli pichoq, uzoq muddat o’tkirlikni saqlab qoladi</p>
+                    <p>Ko‘p funksiyali dizayn: kesish, chopish va tilish uchun mos</p>
+                  </div> */}
+                  <ul>
+                    {product.product_property_Ecommerce_product_properties.map((value, index) => <li key={ index }>{ value.text }</li>)}
+                  </ul>
+                </div>
+              </div>
+
               <path
                 d="M10.0013 13.3333V10M10.0013 6.66667H10.0096M18.3346 10C18.3346 14.6024 14.6037 18.3333 10.0013 18.3333C5.39893 18.3333 1.66797 14.6024 1.66797 10C1.66797 5.39763 5.39893 1.66667 10.0013 1.66667C14.6037 1.66667 18.3346 5.39763 18.3346 10Z"
                 stroke="#41A58D"
@@ -287,21 +341,21 @@ const ProductDetails = () => {
         <div className="littleTitle">Yangi mahsulotlarni sinab ko'ring!</div>
         <div className="similar-products">
           {similarProducts.map((similarProduct, index) => (
-            <Link to={`product/${similarProduct.id}`} key={index}>
+            <Link to={`/online-shop/product/${similarProduct.id}`} key={index}>
               <div className="product">
                 <div className="imgContainer">
-                  <img src={similarProduct.img} alt="" />
+                {/* <img src={'http://127.0.0.1:8901' + String(product.product_image_Ecommerce_product_images[0] ? product.product_image_Ecommerce_product_images[0].image : '/static/404.jpg')} alt="..." /> */}
                 </div>
-                <div className="productTitle">{similarProduct.title}</div>
+                <div className="productTitle">{similarProduct.name}</div>
                 <div className="productDescription">
                   {similarProduct.description}
                 </div>
                 <div className="price">
                   <span className="oldPrice">
-                    {similarProduct.oldPrice} so'm
+                    {similarProduct.price} so'm
                   </span>
                   <span className="newPrice">
-                    {similarProduct.newPrice} so'm
+                    {similarProduct.price_off} so'm
                   </span>
                 </div>
                 <div className="details">
@@ -333,7 +387,7 @@ const ProductDetails = () => {
           ))}
         </div>
       </div>
-    </div>
+    </div></> : <Loading />
   );
 };
 
